@@ -1,0 +1,171 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: linear-gradient(135deg, #0f172a 0%, #1e2937 100%);
+  color: #e2e8f0;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.container {
+  width: 100%;
+  max-width: 460px;
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  padding: 40px 36px;
+  box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.5);
+}
+
+h1 {
+  font-size: 28px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 6px;
+  background: linear-gradient(90deg, #60a5fa, #c084fc);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.subtitle {
+  text-align: center;
+  color: #94a3b8;
+  font-size: 15px;
+  margin-bottom: 32px;
+}
+
+/* Input Area */
+.input-wrapper {
+  position: relative;
+  margin-bottom: 24px;
+}
+
+input {
+  width: 100%;
+  padding: 16px 52px 16px 20px;
+  font-size: 17px;
+  background: #1e2937;
+  border: 2px solid #334155;
+  border-radius: 14px;
+  color: white;
+  transition: all 0.3s ease;
+}
+
+input:focus {
+  outline: none;
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.2);
+  background: #0f172a;
+}
+
+.toggle-btn {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  font-size: 22px;
+  color: #64748b;
+  cursor: pointer;
+  padding: 6px;
+  transition: color 0.2s;
+}
+
+.toggle-btn:hover {
+  color: #cbd5e1;
+}
+
+/* Buttons */
+.generate-btn {
+  width: 100%;
+  padding: 15px;
+  background: linear-gradient(90deg, #22c55e, #4ade80);
+  color: white;
+  font-weight: 600;
+  font-size: 16px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  margin-bottom: 28px;
+  transition: all 0.3s ease;
+  box-shadow: 0 10px 20px -5px rgba(34, 197, 94, 0.4);
+}
+
+.generate-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 25px -5px rgba(34, 197, 94, 0.5);
+}
+
+/* Strength Meter */
+.strength-section {
+  margin-bottom: 20px;
+}
+
+.strength-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  font-size: 14.5px;
+  font-weight: 500;
+}
+
+.strength-label {
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+.strength-bar {
+  height: 10px;
+  background: #1e2937;
+  border-radius: 9999px;
+  overflow: hidden;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+#strength-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: 9999px;
+  transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  background: linear-gradient(90deg, #ef4444, #f59e0b, #eab308, #84cc16, #22c55e);
+}
+
+/* Info Texts */
+.info p {
+  font-size: 14.5px;
+  margin-bottom: 10px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: rgba(30, 41, 59, 0.6);
+}
+
+.info strong {
+  color: #cbd5e1;
+}
+
+/* Color coding for strength text */
+#strength-text.weak { color: #ef4444; }
+#strength-text.fair { color: #f59e0b; }
+#strength-text.good { color: #eab308; }
+#strength-text.strong { color: #84cc16; }
+#strength-text.very-strong { color: #22c55e; }
+
+/* Responsive */
+@media (max-width: 480px) {
+  .container {
+    padding: 32px 24px;
+    border-radius: 20px;
+  }
+}
