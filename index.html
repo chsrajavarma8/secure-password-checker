@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Password Security Tool</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Password Security Tool</h1>
+    <p class="subtitle">Check how strong your password really is</p>
+
+    <div class="input-wrapper">
+      <input 
+        type="password" 
+        id="password" 
+        placeholder="Enter your password"
+        autocomplete="off"
+      >
+      <button type="button" id="toggle-password" class="toggle-btn">👁️</button>
+    </div>
+
+    <button onclick="generatePassword()" class="generate-btn">
+      Generate Strong Password
+    </button>
+
+    <!-- Strength Meter -->
+    <div class="strength-section">
+      <div class="strength-header">
+        <span>Password Strength</span>
+        <span id="strength-text" class="strength-label">Very Weak</span>
+      </div>
+      <div class="strength-bar">
+        <div id="strength-fill"></div>
+      </div>
+    </div>
+
+    <div class="info">
+      <p id="entropy"><strong>Entropy:</strong> — bits</p>
+      <p id="pattern-warning"></p>
+      <p id="feedback"></p>
+      <p id="breach-result"></p>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/zxcvbn/4.4.2/zxcvbn.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
