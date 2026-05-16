@@ -1,237 +1,609 @@
+// ==========================
+// CYBERSHIELD PASSWORD TOOL
+// ==========================
+
 // ===== DOM =====
+
 const input = document.getElementById("password");
-const strengthText = document.getElementById("strength-text");
-const strengthFill = document.getElementById("strength-fill");
-const feedback = document.getElementById("feedback");
-const breachText = document.getElementById("breach-result");
-const entropyText = document.getElementById("entropy");
+
+const strengthText =
+document.getElementById("strength-text");
+
+const strengthFill =
+document.getElementById("strength-fill");
+
+const feedback =
+document.getElementById("feedback");
+
+const breachText =
+document.getElementById("breach-result");
+
+const entropyText =
+document.getElementById("entropy");
+
+const patternWarning =
+document.getElementById("pattern-warning");
+
+const scoreValue =
+document.getElementById("score-value");
+
+const toggleBtn =
+document.getElementById("toggle-password");
+
+const copyBtn =
+document.getElementById("copy-password");
+
+// ===== VARIABLES =====
 
 let timeout;
 let keystrokes = [];
 
-// ===== COMMON PASSWORD LIST =====
-const commonPasswords = ["123456","password","qwerty","abc123","letmein","admin"];
+const commonPasswords = [
+  "123456",
+  "password",
+  "qwerty",
+  "abc123",
+  "letmein",
+  "admin"
+];
 
-// ===== PASSWORD HISTORY (reuse detection) =====
 let passwordHistory = [];
 
-// ===== EVENT =====
+// ==========================
+// TYPING EVENTS
+// ==========================
+
 input.addEventListener("keydown", () => {
   keystrokes.push(Date.now());
 });
 
 input.addEventListener("input", () => {
+
   clearTimeout(timeout);
-  timeout = setTimeout(analyzePassword, 400);
+
+  timeout = setTimeout(() => {
+    analyzePassword();
+  }, 300);
 });
 
-// ===== MAIN ANALYSIS =====
-async function analyzePassword() {
-  const pwd = input.value.trim();
-  if (!pwd) return;
+// ==========================
+// PASSWORD ANALYSIS
+// ==========================
 
-  // ===== ENTROPY =====
+async function analyzePassword(){
+
+  const pwd = input.value.trim();
+
+  // EMPTY RESET
+  if(!pwd){
+
+    strengthText.textContent = "Very Weak";
+
+    strengthText.className =
+    "strength-label weak";
+
+    strengthFill.style.width = "0%";
+
+    entropyText.innerHTML =
+    "<strong>Entropy:</strong> — bits";
+
+    feedback.textContent =
+    "Use at least 12+ characters with symbols and numbers";
+
+    patternWarning.textContent =
+    "No patterns detected";
+
+    breachText.textContent =
+    "Breach scan not started";
+
+    scoreValue.textContent = "0";
+
+    return;
+  }
+
+  // ==========================
+  // ENTROPY
+  // ==========================
+
   const entropy = calculateEntropy(pwd);
 
-  // ===== PATTERN DETECTION =====
+  // ==========================
+  // PATTERN DETECTION
+  // ==========================
+
   const pattern = detectPatterns(pwd);
 
-  // ===== DICTIONARY CHECK =====
-  const isCommon = commonPasswords.includes(pwd.toLowerCase());
+  // ==========================
+  // COMMON PASSWORD CHECK
+  // ==========================
 
-  // ===== GUESS ESTIMATION =====
-  const guesses = Math.pow(2, entropy);
+  const isCommon =
+  commonPasswords.includes(
+    pwd.toLowerCase()
+  );
 
-  // ===== CRACK TIME =====
-  const crack = estimateCrackTime(guesses);
+  // ==========================
+  // GUESSES
+  // ==========================
 
-  // ===== SCORE (REALISTIC) =====
+  const guesses =
+  Math.pow(2, entropy);
+
+  // ==========================
+  // CRACK TIME
+  // ==========================
+
+  const crack =
+  estimateCrackTime(guesses);
+
+  // ==========================
+  // SECURITY SCORE
+  // ==========================
+
   let score = 0;
 
-  if (entropy > 60) score = 4;
-  else if (entropy > 50) score = 3;
-  else if (entropy > 40) score = 2;
-  else if (entropy > 30) score = 1;
+  if(entropy > 60) score = 4;
+  else if(entropy > 50) score = 3;
+  else if(entropy > 40) score = 2;
+  else if(entropy > 30) score = 1;
 
-  if (pattern) score--;
-  if (isCommon) score = 0;
+  if(pattern) score--;
+
+  if(isCommon) score = 0;
 
   score = Math.max(0, Math.min(4, score));
 
+  // ==========================
+  // UPDATE UI
+  // ==========================
+
   updateUI(score, crack);
 
-  entropyText.textContent = `Entropy: ${entropy.toFixed(2)} bits`;
+  // ==========================
+  // ENTROPY TEXT
+  // ==========================
 
-  // ===== FEEDBACK =====
-  feedback.textContent = generateFeedback(pwd, pattern, isCommon);
+  entropyText.innerHTML =
+  `<strong>Entropy:</strong> ${entropy.toFixed(2)} bits`;
 
-  // ===== BREACH CHECK =====
+  // ==========================
+  // PATTERN WARNING
+  // ==========================
+
+  patternWarning.textContent =
+  pattern
+    ? "⚠️ Predictable keyboard or repeated patterns detected"
+    : "✅ No predictable patterns detected";
+
+  // ==========================
+  // FEEDBACK
+  // ==========================
+
+  feedback.textContent =
+  generateFeedback(
+    pwd,
+    pattern,
+    isCommon
+  );
+
+  // ==========================
+  // BREACH CHECK
+  // ==========================
+
   await checkBreach(pwd);
 
-  // ===== REUSE DETECTION =====
-  if (passwordHistory.includes(pwd)) {
-    feedback.textContent += " | ⚠️ Password reused";
+  // ==========================
+  // PASSWORD REUSE
+  // ==========================
+
+  if(passwordHistory.includes(pwd)){
+
+    feedback.textContent +=
+    " | ⚠️ Password reused";
+
   } else {
+
     passwordHistory.push(pwd);
   }
 
-  // ===== TYPING ANALYSIS =====
+  // ==========================
+  // TYPING ANALYSIS
+  // ==========================
+
   analyzeTyping();
 }
 
-// ===== ENTROPY =====
-function calculateEntropy(pwd) {
+// ==========================
+// ENTROPY CALCULATION
+// ==========================
+
+function calculateEntropy(pwd){
+
   let charset = 0;
 
-  if (/[a-z]/.test(pwd)) charset += 26;
-  if (/[A-Z]/.test(pwd)) charset += 26;
-  if (/[0-9]/.test(pwd)) charset += 10;
-  if (/[^a-zA-Z0-9]/.test(pwd)) charset += 32;
+  if(/[a-z]/.test(pwd)) charset += 26;
+  if(/[A-Z]/.test(pwd)) charset += 26;
+  if(/[0-9]/.test(pwd)) charset += 10;
+  if(/[^a-zA-Z0-9]/.test(pwd)) charset += 32;
 
-  return Math.log2(Math.pow(charset, pwd.length));
+  return Math.log2(
+    Math.pow(charset, pwd.length)
+  );
 }
 
-// ===== PATTERN DETECTION =====
-function detectPatterns(pwd) {
+// ==========================
+// PATTERN DETECTION
+// ==========================
+
+function detectPatterns(pwd){
+
   const patterns = [
-    /1234/, /abcd/, /qwerty/,
+
+    /1234/,
+    /abcd/,
+    /qwerty/,
     /(.)\1{2,}/,
-    /password/, /admin/
+    /password/,
+    /admin/
+
   ];
 
-  for (let p of patterns) {
-    if (p.test(pwd.toLowerCase())) {
+  for(let p of patterns){
+
+    if(p.test(pwd.toLowerCase())){
       return true;
     }
   }
+
   return false;
 }
 
-// ===== CRACK TIME =====
-function estimateCrackTime(guesses) {
-  const offlineFast = guesses / 1e10;
-  const onlineSlow = guesses / 100;
+// ==========================
+// CRACK TIME
+// ==========================
+
+function estimateCrackTime(guesses){
+
+  const offlineFast =
+  guesses / 1e10;
+
+  const onlineSlow =
+  guesses / 100;
 
   return {
-    offline: formatTime(offlineFast),
-    online: formatTime(onlineSlow)
+
+    offline:
+    formatTime(offlineFast),
+
+    online:
+    formatTime(onlineSlow)
   };
 }
 
-function formatTime(seconds) {
-  if (seconds < 1) return "seconds";
-  if (seconds < 60) return `${Math.round(seconds)} sec`;
-  if (seconds < 3600) return `${Math.round(seconds/60)} min`;
-  if (seconds < 86400) return `${Math.round(seconds/3600)} hrs`;
-  if (seconds < 31536000) return `${Math.round(seconds/86400)} days`;
+function formatTime(seconds){
+
+  if(seconds < 1)
+    return "seconds";
+
+  if(seconds < 60)
+    return `${Math.round(seconds)} sec`;
+
+  if(seconds < 3600)
+    return `${Math.round(seconds/60)} min`;
+
+  if(seconds < 86400)
+    return `${Math.round(seconds/3600)} hrs`;
+
+  if(seconds < 31536000)
+    return `${Math.round(seconds/86400)} days`;
+
   return `${Math.round(seconds/31536000)} years`;
 }
 
-// ===== UI =====
-function updateUI(score, crack) {
-  const labels = ["Very Weak","Weak","Fair","Good","Strong"];
-  const percent = [10,30,50,75,95];
-  const colors = ["#ef4444","#f97316","#eab308","#22c55e","#16a34a"];
+// ==========================
+// UPDATE UI
+// ==========================
 
-  strengthFill.style.width = percent[score] + "%";
-  strengthFill.style.background = colors[score];
+function updateUI(score, crack){
+
+  const labels = [
+    "Very Weak",
+    "Weak",
+    "Fair",
+    "Strong",
+    "Very Strong"
+  ];
+
+  const percent = [
+    10,
+    30,
+    50,
+    75,
+    100
+  ];
+
+  const classes = [
+    "weak",
+    "weak",
+    "fair",
+    "strong",
+    "very-strong"
+  ];
+
+  strengthFill.style.width =
+  percent[score] + "%";
 
   strengthText.textContent =
-    `${labels[score]} | Offline: ${crack.offline} | Online: ${crack.online}`;
+  `${labels[score]}`;
+
+  strengthText.className =
+  "strength-label " +
+  classes[score];
+
+  scoreValue.textContent =
+  score * 20;
 }
 
-// ===== FEEDBACK =====
-function generateFeedback(pwd, pattern, isCommon) {
+// ==========================
+// FEEDBACK
+// ==========================
+
+function generateFeedback(
+  pwd,
+  pattern,
+  isCommon
+){
+
   let msg = [];
 
-  if (pwd.length < 12)
+  if(pwd.length < 12)
     msg.push("Increase length to 12+");
 
-  if (!/[A-Z]/.test(pwd))
+  if(!/[A-Z]/.test(pwd))
     msg.push("Add uppercase letters");
 
-  if (!/[0-9]/.test(pwd))
+  if(!/[0-9]/.test(pwd))
     msg.push("Include numbers");
 
-  if (!/[!@#$%^&*]/.test(pwd))
+  if(!/[!@#$%^&*]/.test(pwd))
     msg.push("Add symbols");
 
-  if (pattern)
+  if(pattern)
     msg.push("Contains predictable pattern");
 
-  if (isCommon)
-    msg.push("Common password (dictionary attack risk)");
+  if(isCommon)
+    msg.push("Common password risk");
+
+  if(msg.length === 0)
+    return "Excellent password security";
 
   return msg.join(" | ");
 }
 
-// ===== BREACH CHECK =====
-async function checkBreach(pwd) {
-  try {
-    const hash = await sha1(pwd);
-    const prefix = hash.substring(0, 5);
-    const suffix = hash.substring(5).toUpperCase();
+// ==========================
+// BREACH CHECK
+// ==========================
 
-    const res = await fetch(`https://api.pwnedpasswords.com/range/${prefix}`);
-    const text = await res.text();
+async function checkBreach(pwd){
 
-    const lines = text.split("\n");
+  try{
+
+    const hash =
+    await sha1(pwd);
+
+    const prefix =
+    hash.substring(0,5);
+
+    const suffix =
+    hash.substring(5).toUpperCase();
+
+    const res =
+    await fetch(
+      `https://api.pwnedpasswords.com/range/${prefix}`
+    );
+
+    const text =
+    await res.text();
+
+    const lines =
+    text.split("\n");
+
     let count = 0;
 
-    for (let line of lines) {
-      const [h, num] = line.split(":");
-      if (h === suffix) {
-        count = parseInt(num);
+    for(let line of lines){
+
+      const [h, num] =
+      line.split(":");
+
+      if(h === suffix){
+
+        count =
+        parseInt(num);
+
         break;
       }
     }
 
     breachText.textContent =
-      count > 0
-        ? `⚠️ Found ${count} times in breaches`
-        : "✅ Not found in breaches";
+    count > 0
+      ? `⚠️ Found ${count} times in breaches`
+      : "✅ Not found in known breaches";
 
-  } catch {
-    breachText.textContent = "Error checking breaches";
+  } catch{
+
+    breachText.textContent =
+    "Breach API unavailable";
   }
 }
 
-// ===== SHA-1 =====
-async function sha1(str) {
-  const buf = new TextEncoder().encode(str);
-  const hash = await crypto.subtle.digest("SHA-1", buf);
-  return Array.from(new Uint8Array(hash))
-    .map(b => b.toString(16).padStart(2, "0"))
-    .join("");
+// ==========================
+// SHA1
+// ==========================
+
+async function sha1(str){
+
+  const buf =
+  new TextEncoder().encode(str);
+
+  const hash =
+  await crypto.subtle.digest(
+    "SHA-1",
+    buf
+  );
+
+  return Array.from(
+    new Uint8Array(hash)
+  )
+
+  .map(b =>
+    b.toString(16)
+    .padStart(2,"0")
+  )
+
+  .join("");
 }
 
-// ===== PASSWORD GENERATOR (SMART) =====
-function generatePassword() {
-  const words = ["Tiger","Rocket","Shadow","Quantum","Nova","Storm"];
-  const symbols = "!@#$%^&*";
+// ==========================
+// PASSWORD GENERATOR
+// ==========================
 
-  let pwd =
-    words[Math.floor(Math.random()*words.length)] +
-    symbols[Math.floor(Math.random()*symbols.length)] +
-    Math.floor(Math.random()*100) +
-    words[Math.floor(Math.random()*words.length)];
+function generatePassword(){
+
+  const chars =
+  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+[]{}<>?/";
+
+  let pwd = "";
+
+  for(let i=0;i<18;i++){
+
+    const randomIndex =
+    Math.floor(
+      Math.random() *
+      chars.length
+    );
+
+    pwd += chars[randomIndex];
+  }
 
   input.value = pwd;
+
   analyzePassword();
 }
 
-// ===== TYPING ANALYSIS =====
-function analyzeTyping() {
-  if (keystrokes.length < 2) return;
+// ==========================
+// CLEAR PASSWORD
+// ==========================
+
+function clearPassword(){
+
+  input.value = "";
+
+  analyzePassword();
+
+  input.focus();
+}
+
+// ==========================
+// TOGGLE PASSWORD
+// ==========================
+
+toggleBtn.addEventListener(
+  "click",
+  () => {
+
+    const isPassword =
+    input.type === "password";
+
+    input.type =
+    isPassword
+      ? "text"
+      : "password";
+
+    toggleBtn.innerHTML =
+    isPassword
+
+    ? '<i class="fa-regular fa-eye-slash"></i>'
+
+    : '<i class="fa-regular fa-eye"></i>';
+  }
+);
+
+// ==========================
+// COPY PASSWORD
+// ==========================
+
+copyBtn.addEventListener(
+  "click",
+  async () => {
+
+    const pwd =
+    input.value;
+
+    if(!pwd){
+
+      alert("No password to copy");
+
+      return;
+    }
+
+    try{
+
+      await navigator
+      .clipboard
+      .writeText(pwd);
+
+      copyBtn.innerHTML =
+      '<i class="fa-solid fa-check"></i>';
+
+      setTimeout(() => {
+
+        copyBtn.innerHTML =
+        '<i class="fa-regular fa-copy"></i>';
+
+      },1500);
+
+    } catch{
+
+      alert("Copy failed");
+    }
+  }
+);
+
+// ==========================
+// TYPING ANALYSIS
+// ==========================
+
+function analyzeTyping(){
+
+  if(keystrokes.length < 2)
+    return;
 
   let intervals = [];
-  for (let i = 1; i < keystrokes.length; i++) {
-    intervals.push(keystrokes[i] - keystrokes[i - 1]);
+
+  for(
+    let i = 1;
+    i < keystrokes.length;
+    i++
+  ){
+
+    intervals.push(
+      keystrokes[i] -
+      keystrokes[i - 1]
+    );
   }
 
-  const avg = intervals.reduce((a,b)=>a+b,0)/intervals.length;
+  const avg =
+  intervals.reduce(
+    (a,b)=>a+b,
+    0
+  ) / intervals.length;
 
-  if (avg < 50) {
-    feedback.textContent += " | ⚠️ Typing too fast (possible bot)";
+  if(avg < 50){
+
+    feedback.textContent +=
+    " | ⚠️ Typing too fast";
   }
 }
+
+// INITIALIZE
+analyzePassword();
