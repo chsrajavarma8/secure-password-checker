@@ -50,7 +50,8 @@ project/
 ├── script.js         # App logic (strict-mode IIFE, no globals)
 ├── vendor/
 │   └── zxcvbn.js     # zxcvbn 4.4.2, integrity-pinned
-└── _headers          # Security headers for Netlify / Cloudflare Pages
+├── _headers          # Security headers for Netlify / Cloudflare Pages
+└── vercel.json       # Security headers for Vercel
 ```
 
 ---
@@ -66,9 +67,10 @@ python -m http.server 8000
 
 ### Deploying
 
+* **Vercel** (live site): `vercel.json` applies the security headers.
 * **Netlify / Cloudflare Pages**: deploy the folder as is; `_headers` is applied automatically.
 * **GitHub Pages**: custom headers aren't supported, so the `<meta>` CSP in `index.html` is the fallback (it can't set `frame-ancestors` or HSTS).
-* **Other hosts (nginx, Apache, Vercel)**: copy the headers from `_headers` into the server config.
+* **Other hosts (nginx, Apache)**: copy the headers from `_headers` into the server config.
 
 ### Updating zxcvbn
 

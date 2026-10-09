@@ -1,0 +1,2 @@
+# Keep vendored files byte-exact so the SRI hash in index.html stays valid
+vendor/** -text
