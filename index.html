@@ -4,28 +4,47 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <title>CyberShield Password Security Tool</title>
-
-  <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-
-  <!-- Font Awesome -->
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+  <!--
+    Security policy (meta fallback — also send these as real HTTP headers, see _headers).
+    - Only same-origin scripts/styles; no inline script, no eval.
+    - Network access limited to the Have I Been Pwned range API.
+  -->
+  <meta
+    http-equiv="Content-Security-Policy"
+    content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src https://api.pwnedpasswords.com; base-uri 'none'; form-action 'none'; manifest-src 'none'; object-src 'none'; upgrade-insecure-requests"
   />
+  <meta name="referrer" content="no-referrer" />
+  <meta name="color-scheme" content="dark" />
+  <meta name="description" content="Client-side password strength analyzer and cryptographically secure password generator. Your password never leaves your device." />
 
-  <!-- CSS -->
+  <title>CyberShield Password Security Tool</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%2338bdf8' d='M12 2 4 5v6c0 5.25 3.4 10.15 8 11.5 4.6-1.35 8-6.25 8-11.5V5l-8-3Z'/%3E%3C/svg%3E" />
+
   <link rel="stylesheet" href="style.css" />
 </head>
 
 <body>
 
+  <!-- SVG ICON SPRITE (replaces external icon font) -->
+  <svg xmlns="http://www.w3.org/2000/svg" class="sprite" aria-hidden="true" focusable="false">
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 2 4 5v6c0 5.25 3.4 10.15 8 11.5 4.6-1.35 8-6.25 8-11.5V5l-8-3Zm0 2.18 6 2.25V11c0 4.17-2.6 8.1-6 9.4V4.18Z"/></symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24"><path d="M12 5C6.5 5 2.7 9.1 1.5 12c1.2 2.9 5 7 10.5 7s9.3-4.1 10.5-7C21.3 9.1 17.5 5 12 5Zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10Zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z"/></symbol>
+    <symbol id="i-eye-off" viewBox="0 0 24 24"><path d="M2.3 3.7 3.7 2.3l18 18-1.4 1.4-3.2-3.2A11.3 11.3 0 0 1 12 19C6.5 19 2.7 14.9 1.5 12a13 13 0 0 1 4-4.9L2.3 3.7ZM7 8.5A10.8 10.8 0 0 0 3.7 12c1.2 2.2 4.2 5 8.3 5 1.2 0 2.4-.2 3.4-.7l-1.8-1.8A3 3 0 0 1 9.5 11L7 8.5ZM12 5c5.5 0 9.3 4.1 10.5 7a13 13 0 0 1-2.9 4l-1.4-1.4A10.6 10.6 0 0 0 20.3 12C19.1 9.8 16.1 7 12 7c-.6 0-1.2 0-1.8.2L8.5 5.5C9.6 5.2 10.8 5 12 5Zm0 2a5 5 0 0 1 5 5l-.1 1L11 7.1l1-.1Z"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><path d="M16 1H4a2 2 0 0 0-2 2v14h2V3h12V1Zm3 4H8a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2Zm0 16H8V7h11v14Z"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m9 16.2-4.2-4.2-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2Z"/></symbol>
+    <symbol id="i-key" viewBox="0 0 24 24"><path d="M12.65 10A6 6 0 1 0 7 18a6 6 0 0 0 5.65-4H17v4h4v-4h2v-4H12.65ZM7 14a2 2 0 1 1 0-4 2 2 0 0 1 0 4Z"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M6 19a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7H6v12ZM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4Z"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><path d="M18 8h-1V6a5 5 0 0 0-10 0v2H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2ZM9 6a3 3 0 0 1 6 0v2H9V6Zm3 11a2 2 0 1 1 0-4 2 2 0 0 1 0 4Z"/></symbol>
+    <symbol id="i-warn" viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21Zm12-3h-2v-2h2v2Zm0-4h-2v-4h2v4Z"/></symbol>
+    <symbol id="i-bulb" viewBox="0 0 24 24"><path d="M9 21a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-1H9v1Zm3-19a7 7 0 0 0-4 12.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26A7 7 0 0 0 12 2Z"/></symbol>
+    <symbol id="i-virus" viewBox="0 0 24 24"><path d="M12 2 4 5v6c0 5.25 3.4 10.15 8 11.5 4.6-1.35 8-6.25 8-11.5V5l-8-3Zm-1 14-4-4 1.4-1.4 2.6 2.6 5.6-5.6L18 9l-7 7Z"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm0 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16Zm.5-13H11v6l5.2 3.2.8-1.3-4.5-2.7V7Z"/></symbol>
+    <symbol id="i-secret" viewBox="0 0 24 24"><path d="M12 1 3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4Zm0 6a3 3 0 1 1 0 6 3 3 0 0 1 0-6Zm5.13 12a10.2 10.2 0 0 1-5.13 2.9A10.2 10.2 0 0 1 6.87 19 6.7 6.7 0 0 1 12 16.5a6.7 6.7 0 0 1 5.13 2.5Z"/></symbol>
+    <symbol id="i-code" viewBox="0 0 24 24"><path d="M9.4 16.6 4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4Zm5.2 0 4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4Z"/></symbol>
+  </svg>
+
   <!-- Animated Background -->
-  <div class="bg-animation">
+  <div class="bg-animation" aria-hidden="true">
     <span></span>
     <span></span>
     <span></span>
@@ -33,27 +52,32 @@
   </div>
 
   <!-- MAIN CONTAINER -->
-  <div class="container">
+  <main class="container">
 
     <!-- HEADER -->
-    <div class="header">
+    <header class="header">
 
-      <div class="shield-icon">
-        <i class="fa-solid fa-shield-halved"></i>
+      <div class="shield-icon" aria-hidden="true">
+        <svg class="icon"><use href="#i-shield"></use></svg>
       </div>
 
       <h1>CyberShield</h1>
 
       <p class="subtitle">
-        Advanced Password Security Analyzer & Generator
+        Advanced Password Security Analyzer &amp; Generator
       </p>
 
-    </div>
+      <p class="privacy-badge">
+        <svg class="icon" aria-hidden="true"><use href="#i-lock"></use></svg>
+        100% client-side &middot; your password never leaves this device
+      </p>
+
+    </header>
 
     <!-- PASSWORD INPUT -->
     <div class="input-wrapper">
 
-      <label class="input-label">
+      <label class="input-label" for="password">
         Enter Password
       </label>
 
@@ -62,154 +86,199 @@
         <input
           type="password"
           id="password"
-          placeholder="Type secure password..."
+          name="cybershield-analyze"
+          placeholder="Type a password to analyze..."
           autocomplete="off"
+          autocapitalize="off"
+          autocorrect="off"
           spellcheck="false"
+          maxlength="256"
+          data-lpignore="true"
+          data-1p-ignore
+          data-bwignore
+          aria-describedby="strength-text feedback"
         />
 
-        <!-- Copy Button -->
         <button
           type="button"
           id="copy-password"
           class="icon-btn copy-btn"
-          title="Copy Password"
+          title="Copy password (clipboard auto-clears in 30s)"
+          aria-label="Copy password"
         >
-          <i class="fa-regular fa-copy"></i>
+          <svg class="icon" aria-hidden="true"><use href="#i-copy"></use></svg>
         </button>
 
-        <!-- Toggle Button -->
         <button
           type="button"
           id="toggle-password"
           class="icon-btn toggle-btn"
-          title="Show Password"
+          title="Show password"
+          aria-label="Show password"
+          aria-pressed="false"
         >
-          <i class="fa-regular fa-eye"></i>
+          <svg class="icon" aria-hidden="true"><use href="#i-eye"></use></svg>
         </button>
 
       </div>
 
+      <p id="status-msg" class="status-msg" role="status" aria-live="polite"></p>
+
     </div>
+
+    <!-- GENERATOR OPTIONS -->
+    <details class="generator-options">
+
+      <summary>Generator settings</summary>
+
+      <div class="option-row">
+        <label for="gen-length">Length</label>
+        <input type="range" id="gen-length" min="12" max="64" value="20" />
+        <output id="gen-length-value" for="gen-length">20</output>
+      </div>
+
+      <div class="option-grid">
+        <label class="check"><input type="checkbox" id="gen-upper" checked /> A–Z</label>
+        <label class="check"><input type="checkbox" id="gen-lower" checked /> a–z</label>
+        <label class="check"><input type="checkbox" id="gen-digits" checked /> 0–9</label>
+        <label class="check"><input type="checkbox" id="gen-symbols" checked /> !@#$</label>
+        <label class="check wide"><input type="checkbox" id="gen-ambiguous" /> Exclude look-alikes (0 O o 1 l I |)</label>
+      </div>
+
+    </details>
 
     <!-- BUTTONS -->
     <div class="button-group">
 
-      <button onclick="generatePassword()" class="generate-btn">
-        <i class="fa-solid fa-key"></i>
+      <button type="button" id="generate-btn" class="generate-btn">
+        <svg class="icon" aria-hidden="true"><use href="#i-key"></use></svg>
         Generate Strong Password
       </button>
 
-      <button onclick="clearPassword()" class="secondary-btn">
-        <i class="fa-solid fa-trash"></i>
+      <button type="button" id="clear-btn" class="secondary-btn">
+        <svg class="icon" aria-hidden="true"><use href="#i-trash"></use></svg>
         Clear
       </button>
 
     </div>
 
     <!-- PASSWORD STRENGTH -->
-    <div class="strength-section">
+    <section class="strength-section" aria-label="Password strength">
 
       <div class="strength-header">
-
-        <span class="strength-title">
-          Security Strength
-        </span>
-
-        <span id="strength-text" class="strength-label weak">
-          Very Weak
-        </span>
-
+        <span class="strength-title">Security Strength</span>
+        <span id="strength-text" class="strength-label weak" aria-live="polite">—</span>
       </div>
 
-      <div class="strength-bar">
+      <div
+        class="strength-bar"
+        role="progressbar"
+        aria-label="Password strength"
+        aria-valuemin="0"
+        aria-valuemax="100"
+        aria-valuenow="0"
+        id="strength-bar"
+      >
         <div id="strength-fill"></div>
       </div>
 
-    </div>
+    </section>
 
     <!-- SECURITY SCORE -->
-    <div class="score-card">
+    <section class="score-card" aria-label="Security score">
 
-      <div class="score-circle">
+      <div class="score-circle" id="score-circle">
         <span id="score-value">0</span>
       </div>
 
       <div class="score-info">
-        <h3>Security Score</h3>
-        <p>
-          Password resistance against modern brute-force attacks
-        </p>
+        <h2>Security Score</h2>
+        <p>Resistance against modern dictionary, pattern and brute-force attacks</p>
       </div>
 
-    </div>
+    </section>
 
     <!-- SECURITY INFO -->
-    <div class="info">
+    <section class="info" aria-label="Analysis details">
 
       <div class="info-card">
-        <i class="fa-solid fa-lock"></i>
-        <p id="entropy">
-          <strong>Entropy:</strong> — bits
-        </p>
+        <svg class="icon" aria-hidden="true"><use href="#i-lock"></use></svg>
+        <p><strong>Entropy:</strong> <span id="entropy">—</span></p>
       </div>
 
       <div class="info-card">
-        <i class="fa-solid fa-triangle-exclamation"></i>
-        <p id="pattern-warning">
-          No patterns detected
-        </p>
+        <svg class="icon" aria-hidden="true"><use href="#i-clock"></use></svg>
+        <div class="crack-times">
+          <p><strong>Online attack</strong> (throttled): <span id="crack-online">—</span></p>
+          <p><strong>Offline attack</strong> (fast hash, GPU rig): <span id="crack-offline">—</span></p>
+        </div>
       </div>
 
       <div class="info-card">
-        <i class="fa-solid fa-lightbulb"></i>
-        <p id="feedback">
-          Use at least 12+ characters with symbols and numbers
-        </p>
+        <svg class="icon" aria-hidden="true"><use href="#i-warn"></use></svg>
+        <p id="pattern-warning">No patterns detected</p>
       </div>
 
       <div class="info-card">
-        <i class="fa-solid fa-shield-virus"></i>
-        <p id="breach-result">
-          Breach scan not started
-        </p>
+        <svg class="icon" aria-hidden="true"><use href="#i-bulb"></use></svg>
+        <ul id="feedback" class="feedback-list">
+          <li>Use at least 14 characters — a long passphrase is best</li>
+        </ul>
       </div>
 
-    </div>
+      <div class="info-card">
+        <svg class="icon" aria-hidden="true"><use href="#i-virus"></use></svg>
+        <div class="breach-block">
+          <p id="breach-result" aria-live="polite">Breach scan not started</p>
+          <label class="check small">
+            <input type="checkbox" id="breach-enabled" checked />
+            Check Have I Been Pwned (k-anonymity: only 5 hash characters are sent)
+          </label>
+        </div>
+      </div>
+
+    </section>
 
     <!-- PASSWORD TIPS -->
-    <div class="tips-section">
+    <section class="tips-section">
 
-      <h3>
-        <i class="fa-solid fa-user-secret"></i>
+      <h2>
+        <svg class="icon" aria-hidden="true"><use href="#i-secret"></use></svg>
         Security Tips
-      </h3>
+      </h2>
 
       <ul>
-        <li>Never reuse passwords across websites</li>
-        <li>Use 14+ character passwords minimum</li>
-        <li>Enable Two-Factor Authentication (2FA)</li>
-        <li>Avoid names, birthdays, or predictable words</li>
+        <li>Never reuse passwords across websites — use a password manager</li>
+        <li>Prefer 14+ characters; long random passphrases beat short complex ones</li>
+        <li>Enable multi-factor authentication (passkeys or an authenticator app)</li>
+        <li>Avoid names, birthdays, keyboard walks and predictable substitutions</li>
       </ul>
 
-    </div>
+    </section>
 
-  </div>
+    <noscript>
+      <p class="noscript">JavaScript is required for password analysis. Nothing is ever sent to a server.</p>
+    </noscript>
+
+  </main>
 
   <!-- FOOTER -->
   <footer class="footer">
-
     <p>
-      <i class="fa-solid fa-code"></i>
+      <svg class="icon" aria-hidden="true"><use href="#i-code"></use></svg>
       Made by Chekuri Satyanarayana Raja Varma | Cybersecurity Project
     </p>
-
   </footer>
 
-  <!-- zxcvbn Password Library -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/zxcvbn/4.4.2/zxcvbn.js"></script>
+  <!-- zxcvbn 4.4.2 (vendored locally; integrity-pinned) -->
+  <script
+    src="vendor/zxcvbn.js"
+    integrity="sha512-TZlMGFY9xKj38t/5m2FzJ+RM/aD5alMHDe26p0mYUMoCF5G7ibfHUQILq0qQPV3wlsnCwL+TPRNK4vIWGLOkUQ=="
+    defer
+  ></script>
 
-  <!-- JavaScript -->
-  <script src="script.js"></script>
+  <!-- App -->
+  <script src="script.js" defer></script>
 
 </body>
 </html>

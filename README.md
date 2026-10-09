@@ -1,91 +1,43 @@
-# 🔐 Password Security Tool
+# 🔐 CyberShield — Password Security Tool
 
-A web-based password analysis tool that evaluates password strength using real-world security concepts like entropy, pattern detection, and breach checking.
+A privacy-first, fully client-side password analyzer and generator. It evaluates password strength using real-world attack models (zxcvbn), checks for breaches using the Have I Been Pwned k-anonymity API, and generates passwords with a cryptographically secure random number generator.
+
+**Your password never leaves your device.** Only the first 5 characters of its SHA-1 hash are sent for the breach check, and you can switch that off.
 
 ---
 
 ## 🚀 Features
 
-* 🔎 **Password Strength Analysis**
-
-  * Calculates entropy to estimate unpredictability
-  * Classifies passwords from *Very Weak → Strong*
-
-* ⚠️ **Pattern Detection**
-
-  * Detects common weak patterns (e.g., `1234`, `aaaa`, `qwerty`)
-
-* 📚 **Dictionary Check**
-
-  * Flags commonly used passwords like `password`, `admin`
-
-* 🌐 **Breach Detection**
-
-  * Uses Have I Been Pwned API (k-anonymity model)
-  * Checks if password appeared in real-world data leaks
-
-* ⏱️ **Crack Time Estimation**
-
-  * Estimates time required for brute-force attacks
-
-* 🔐 **Password Generator**
-
-  * Generates strong random passwords with symbols, numbers, and mixed case
-
-* 👁️ **Show/Hide Password**
-
-  * Toggle password visibility
+* 🔎 **Realistic strength analysis**: [zxcvbn](https://github.com/dropbox/zxcvbn) detects dictionary words, l33t substitutions, keyboard walks, sequences, repeats and dates
+* 📊 **Effective vs. brute-force entropy**: shows both the realistic estimate and the theoretical maximum
+* ⏱️ **Crack-time estimates** for a throttled online attack (10 guesses/s) and an offline GPU attack (10¹⁰ guesses/s)
+* 🌐 **Breach detection** via Have I Been Pwned (k-anonymity, padded responses, opt-out toggle)
+* 🔐 **Secure password generator**: `crypto.getRandomValues()` with rejection sampling, configurable length (12–64), character sets, and look-alike exclusion
+* 📋 **Copy with auto-clearing clipboard** (30 s)
+* 👁️ **Show/hide with auto-hide** (20 s) to protect against shoulder surfing
+* ♿ Accessible: labelled controls, live regions, keyboard focus styles, reduced-motion support
 
 ---
 
-## 🧠 How It Works
+## 🛡️ Security Design
 
-### 1. Entropy Calculation
+| Area | Protection |
+|---|---|
+| Randomness | `crypto.getRandomValues()` with rejection sampling (no modulo bias), plus a Fisher–Yates shuffle |
+| Breach check | SHA-1 prefix only (k-anonymity), `Add-Padding` header, no cookies, no referrer, `no-store` cache, abortable, race-safe |
+| Data handling | Nothing is stored, logged or persisted. No password history, no keystroke timing, no `localStorage` |
+| XSS | No `innerHTML`; all output goes through `textContent`. No inline scripts or event handlers |
+| CSP | `default-src 'none'`, scripts/styles from `'self'` only, network limited to `api.pwnedpasswords.com` |
+| Supply chain | zxcvbn is vendored locally and pinned with an SRI `sha512` hash (verified against cdnjs). No third-party fonts, icons or CDNs |
+| Lifecycle | The input is wiped on `pagehide`, so the back/forward cache can't restore a typed password |
+| Password managers | The input is marked so password managers don't offer to save it |
+| HTTP headers | `_headers` sets CSP with `frame-ancestors 'none'`, HSTS, `nosniff`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`, COOP/CORP and `no-store` |
 
-Measures how unpredictable a password is based on length and character variety.
+### Known limits
 
-* Example:
-
-  * `password123` → Low entropy
-  * `T!g9#LpQ2@zX` → High entropy
-
----
-
-### 2. Pattern Detection
-
-Identifies predictable sequences attackers commonly use.
-
-* Example:
-
-  * `aaaa1234` → Weak
-  * `qwerty@123` → Weak
-
----
-
-### 3. Breach Check (Real-world security)
-
-* Password is converted to SHA-1 hash
-* Only partial hash is sent to API (privacy-safe)
-* API checks if password exists in leaked databases
-
----
-
-### 4. Crack Time Estimation
-
-Calculates how long it would take to crack a password.
-
-* Weak passwords → seconds
-* Strong passwords → years
-
----
-
-## 🛠️ Technologies Used
-
-* HTML5
-* CSS3
-* JavaScript (Vanilla JS)
-* Web Crypto API (SHA-1 hashing)
-* Have I Been Pwned API
+* JavaScript strings are immutable, so a password can't be reliably wiped from memory. The app keeps no references to it after each analysis.
+* The clipboard auto-clear overwrites whatever is on the clipboard after 30 s, and runs once the tab regains focus if it was in the background.
+* zxcvbn analyses the first 100 characters only. Characters beyond that get no extra credit (a conservative choice).
 
 ---
 
@@ -93,35 +45,44 @@ Calculates how long it would take to crack a password.
 
 ```
 project/
-│── index.html
-│── style.css
-│── script.js
+├── index.html        # Markup, CSP meta, inline SVG icon sprite
+├── style.css         # Styles (system fonts, no external assets)
+├── script.js         # App logic (strict-mode IIFE, no globals)
+├── vendor/
+│   └── zxcvbn.js     # zxcvbn 4.4.2, integrity-pinned
+└── _headers          # Security headers for Netlify / Cloudflare Pages
 ```
 
 ---
 
 ## ▶️ How to Run
 
-1. Download or clone the repository
-2. Open `index.html` in your browser
-3. Enter a password and see the analysis
+Serve the folder over HTTP. Opening `index.html` directly (`file://`) blocks the clipboard and integrity-checked scripts in some browsers.
+
+```bash
+python -m http.server 8000
+# then open http://localhost:8000
+```
+
+### Deploying
+
+* **Netlify / Cloudflare Pages**: deploy the folder as is; `_headers` is applied automatically.
+* **GitHub Pages**: custom headers aren't supported, so the `<meta>` CSP in `index.html` is the fallback (it can't set `frame-ancestors` or HSTS).
+* **Other hosts (nginx, Apache, Vercel)**: copy the headers from `_headers` into the server config.
+
+### Updating zxcvbn
+
+If you replace `vendor/zxcvbn.js`, regenerate the SRI hash and update the `integrity` attribute in `index.html`:
+
+```bash
+echo "sha512-$(openssl dgst -sha512 -binary vendor/zxcvbn.js | openssl base64 -A)"
+```
 
 ---
 
-## ⚠️ Limitations
+## 🛠️ Technologies
 
-* Entropy model is simplified (not full attack simulation)
-* Pattern detection is basic
-* Password generator is not cryptographically secure
-
----
-
-## 🔥 Future Improvements
-
-* Integrate zxcvbn for better strength estimation
-* Add real GPU-based crack simulation
-* Improve password generator using secure randomness
-* Add UI improvements and accessibility
+HTML5 · CSS3 · Vanilla JavaScript · Web Crypto API · zxcvbn · Have I Been Pwned API
 
 ---
 
@@ -133,4 +94,4 @@ project/
 
 ## 📌 Project Goal
 
-To demonstrate how password strength is evaluated in real-world systems and educate users on creating secure passwords.
+To show how password strength is evaluated in real-world systems, and to teach users how to create secure passwords, using a tool that is itself built to modern web-security standards.
